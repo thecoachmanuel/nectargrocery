@@ -48,4 +48,4 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 EXPOSE 8080
 
 # Command to launch Nginx & PHP-FPM concurrently via Supervisor
-CMD ["sh", "-c", "sed -i \"s/listen 8080;/listen ${PORT:-8080};/g\" /etc/nginx/nginx.conf && mkdir -p storage/framework/cache/data storage/framework/views storage/framework/sessions storage/logs && chmod -R 777 storage bootstrap/cache && php artisan storage:link || true; php artisan config:cache && php artisan route:cache && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]
+CMD ["sh", "-c", "sed -i \"s/listen 8080;/listen ${PORT:-8080};/g\" /etc/nginx/nginx.conf && mkdir -p storage/framework/cache/data storage/framework/views storage/framework/sessions storage/logs && chmod -R 777 storage bootstrap/cache && php artisan storage:link || true; php artisan config:clear && php artisan route:clear && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]

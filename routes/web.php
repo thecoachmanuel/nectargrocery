@@ -362,8 +362,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/social-auth', [SocialAuthController::class, 'index'])->name('socialAuth.index');
         Route::post('/social-auth/update', [SocialAuthController::class, 'update'])->name('socialAuth.update');
         Route::get('/whatsapp-chat-alias', [WhatsAppChatController::class, 'index'])->name('whatsAppChat.index');
-        Route::get('/ai-prompt', fn() => redirect()->route('admin.generale-setting.index'))->name('aiPrompt.index');
-        Route::get('/ai-prompt/configure', fn() => redirect()->route('admin.generale-setting.index'))->name('aiPrompt.configure');
+        Route::get('/ai-prompt', [GeneraleSettingController::class, 'index'])->name('aiPrompt.index');
+        Route::get('/ai-prompt/configure', [GeneraleSettingController::class, 'index'])->name('aiPrompt.configure');
     });
 });
 
@@ -424,7 +424,6 @@ Route::prefix('shop')->name('shop.')->group(function () {
 
         Route::controller(ShopProductController::class)->group(function () {
             Route::get('/product/{id}/toggle', 'toggle')->name('product.toggle');
-            Route::get('/product/{id}', 'show')->name('product.show');
         });
 
         Route::resource('flash-sale', ShopFlashSaleController::class)->names('flashSale');
