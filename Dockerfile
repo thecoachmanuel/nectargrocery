@@ -2,6 +2,7 @@ FROM php:8.4-cli-alpine
 
 # Install system dependencies & PHP extensions required by Laravel
 RUN apk add --no-cache \
+    ca-certificates \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
