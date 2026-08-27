@@ -7,9 +7,18 @@
       "runtime": "vercel-php@0.7.3",
       "memory": 1024,
       "maxDuration": 30
+    },
+    "api/diag.php": {
+      "runtime": "vercel-php@0.7.3",
+      "memory": 512,
+      "maxDuration": 15
     }
   },
   "routes": [
+    {
+      "src": "/diag",
+      "dest": "/api/diag.php"
+    },
     {
       "src": "/build/(.*)",
       "dest": "/public/build/$1"
