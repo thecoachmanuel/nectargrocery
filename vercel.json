@@ -4,12 +4,10 @@
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.3",
-      "memory": 1024,
       "maxDuration": 30
     },
     "api/diag.php": {
       "runtime": "vercel-php@0.7.3",
-      "memory": 512,
       "maxDuration": 10
     }
   },
@@ -23,7 +21,7 @@
   ],
   "env": {
     "APP_ENV": "production",
-    "APP_DEBUG": "false",
+    "APP_DEBUG": "true",
     "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
     "CACHE_DRIVER": "array",
     "LOG_CHANNEL": "stderr",
