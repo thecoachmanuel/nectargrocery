@@ -1,4 +1,4 @@
-FROM php:8.2-cli-alpine
+FROM php:8.4-cli-alpine
 
 # Install system dependencies & PHP extensions required by Laravel
 RUN apk add --no-cache \
@@ -23,8 +23,8 @@ WORKDIR /var/www/html
 # Copy repository code
 COPY . .
 
-# Install PHP dependencies & build frontend assets
-RUN composer install --no-dev --optimize-autoloader --no-interaction \
+# Install PHP dependencies (with --no-scripts to prevent build-time artisan errors) & build frontend assets
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts \
     && npm install \
     && npm run build \
     && chmod -R 777 storage bootstrap/cache
@@ -32,5 +32,5 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction \
 # Expose default HTTP port
 EXPOSE 8080
 
-# Command to launch Laravel web server
-CMD ["sh", "-c", "php artisan storage:link || true; php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
+# Command to launch Laravel web server at runtime
+CMD ["sh", "-c", "composer dump-autoload --optimize --no-dev && php artisan storage:link || true; php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
