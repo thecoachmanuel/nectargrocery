@@ -1,7 +1,5 @@
 <?php
 
-header('Content-Type: text/html; charset=utf-8');
-
 try {
     define('LARAVEL_START', microtime(true));
 
@@ -59,6 +57,7 @@ try {
 
 } catch (\Throwable $e) {
     http_response_code(500);
+    header('Content-Type: text/html; charset=utf-8');
     echo '<h2>ReadyGrocery - Application Error</h2>';
     echo '<p><b>Message:</b> ' . htmlspecialchars($e->getMessage()) . '</p>';
     echo '<p><b>File:</b> ' . htmlspecialchars($e->getFile()) . ':' . $e->getLine() . '</p>';
