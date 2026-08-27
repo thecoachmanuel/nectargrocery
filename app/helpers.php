@@ -65,43 +65,57 @@ if (! function_exists('generaleSetting')) {
                 return GeneraleSetting::first();
             });
         } catch (\Throwable $e) {
-            $generaleSetting = GeneraleSetting::first();
+            $generaleSetting = null;
+        }
+        if (!$generaleSetting) {
+            try { $generaleSetting = GeneraleSetting::first(); } catch (\Throwable $e) {}
         }
 
         if ($type == 'setting' || $type == null) {
             return $generaleSetting;
         }
 
+        $getRootShop = function() {
+            try {
+                return User::role('root')->whereHas('shop')->first()?->shop;
+            } catch (\Throwable $e) {
+                try { return Shop::first(); } catch (\Throwable $e) { return null; }
+            }
+        };
+
         if ($type == 'rootShop') {
             try {
-                return Cache::remember('admin_shop', 60 * 24 * 7, function () {
-                    return User::role('root')->whereHas('shop')->first()?->shop;
+                return Cache::remember('admin_shop', 60 * 24 * 7, function () use ($getRootShop) {
+                    return $getRootShop();
                 });
             } catch (\Throwable $e) {
-                return User::role('root')->whereHas('shop')->first()?->shop;
+                return $getRootShop();
             }
         }
 
         if ($type == 'shop') {
             if ($generaleSetting?->shop_type == 'single') {
-                $shop = User::role('root')->whereHas('shop')->first()?->shop;
+                $shop = $getRootShop();
             } else {
-                /** @var User */
                 $user = $authUser ?? auth()->user();
                 $shop = $user?->shop ?? $user?->myShop;
             }
 
             if (! $shop) {
-                $shop = User::role('root')->whereHas('shop')->first()?->shop;
+                $shop = $getRootShop();
             }
 
             return $shop;
         }
 
         if ($type == 'defaultCurrency') {
-            $defaultCurrency = Cache::remember('default_currency', 60 * 24 * 30, function () {
-                return Currency::where('is_default', 1)->first();
-            });
+            try {
+                $defaultCurrency = Cache::remember('default_currency', 60 * 24 * 30, function () {
+                    return Currency::where('is_default', 1)->first() ?? Currency::first();
+                });
+            } catch (\Throwable $e) {
+                try { $defaultCurrency = Currency::where('is_default', 1)->first() ?? Currency::first(); } catch (\Throwable $e) { $defaultCurrency = null; }
+            }
 
             return $defaultCurrency;
         }
