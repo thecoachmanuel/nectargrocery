@@ -13,7 +13,7 @@ RUN apk add --no-cache \
     git \
     curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql gd zip bcmath intl mbstring
+    && docker-php-ext-install pdo_mysql gd zip bcmath intl mbstring exif opcache
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -23,8 +23,8 @@ WORKDIR /var/www/html
 # Copy repository code
 COPY . .
 
-# Install PHP dependencies (with --no-scripts to prevent build-time artisan errors) & build frontend assets
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts \
+# Install PHP dependencies & build frontend assets
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs \
     && npm install \
     && npm run build \
     && chmod -R 777 storage bootstrap/cache
