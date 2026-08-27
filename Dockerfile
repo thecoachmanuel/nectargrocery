@@ -33,5 +33,5 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 # Expose default HTTP port
 EXPOSE 8080
 
-# Command to launch PHP web server targeting public/ directory
-CMD ["sh", "-c", "mkdir -p storage/framework/cache/data storage/framework/views storage/framework/sessions storage/logs && chmod -R 777 storage bootstrap/cache && php artisan config:clear && php artisan cache:clear && php artisan storage:link || true; php -S 0.0.0.0:${PORT:-8080} -t public"]
+# Command to launch PHP web server with public/index.php router script
+CMD ["sh", "-c", "mkdir -p storage/framework/cache/data storage/framework/views storage/framework/sessions storage/logs && chmod -R 777 storage bootstrap/cache && php artisan config:clear && php artisan cache:clear && php artisan storage:link || true; php -S 0.0.0.0:${PORT:-8080} -t public public/index.php"]
