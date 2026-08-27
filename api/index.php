@@ -5,6 +5,17 @@ header('Content-Type: text/html; charset=utf-8');
 try {
     define('LARAVEL_START', microtime(true));
 
+    // Sanitize key environment variables if variable names were pasted into Vercel value fields
+    foreach (['APP_KEY', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'] as $envKey) {
+        $val = getenv($envKey) ?: ($_ENV[$envKey] ?? null);
+        if ($val) {
+            $cleaned = preg_replace('/^' . $envKey . '=/i', '', trim($val));
+            $_ENV[$envKey] = $cleaned;
+            $_SERVER[$envKey] = $cleaned;
+            putenv($envKey . '=' . $cleaned);
+        }
+    }
+
     $autoloadPath = __DIR__ . '/../vendor/autoload.php';
     if (!file_exists($autoloadPath)) {
         throw new Exception("Vendor autoloader not found at: " . realpath(__DIR__ . '/..') . "/vendor/autoload.php");
