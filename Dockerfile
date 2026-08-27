@@ -33,4 +33,4 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 EXPOSE 8080
 
 # Command to launch Laravel web server at runtime
-CMD ["sh", "-c", "php artisan config:clear && php artisan cache:clear && php artisan storage:link || true; php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
+CMD ["sh", "-c", "mkdir -p storage/framework/cache/data storage/framework/views storage/framework/sessions storage/logs && chmod -R 777 storage bootstrap/cache && php artisan config:clear && php artisan cache:clear && php artisan storage:link || true; php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]

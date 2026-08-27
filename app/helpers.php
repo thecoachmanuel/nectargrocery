@@ -60,19 +60,26 @@ if (! function_exists('generaleSetting')) {
      */
     function generaleSetting($type = null, $authUser = null)
     {
-        // Cache general setting data for  30 days
-        $generaleSetting = Cache::remember('generale_setting', 60 * 24 * 30, function () {
-            return GeneraleSetting::first();
-        });
+        try {
+            $generaleSetting = Cache::remember('generale_setting', 60 * 24 * 30, function () {
+                return GeneraleSetting::first();
+            });
+        } catch (\Throwable $e) {
+            $generaleSetting = GeneraleSetting::first();
+        }
 
         if ($type == 'setting' || $type == null) {
             return $generaleSetting;
         }
 
         if ($type == 'rootShop') {
-            return Cache::remember('admin_shop', 60 * 24 * 7, function () {
+            try {
+                return Cache::remember('admin_shop', 60 * 24 * 7, function () {
+                    return User::role('root')->whereHas('shop')->first()?->shop;
+                });
+            } catch (\Throwable $e) {
                 return User::role('root')->whereHas('shop')->first()?->shop;
-            });
+            }
         }
 
         if ($type == 'shop') {
