@@ -10,6 +10,9 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        chunkSizeWarningLimit: 1600,
+    },
     server: {
         watch: {
             ignored: [
