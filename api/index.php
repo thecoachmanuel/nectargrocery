@@ -1,34 +1,53 @@
 <?php
 
-// Forward Vercel requests to public/index.php
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
+
 define('LARAVEL_START', microtime(true));
 
 // Register the Auto Loader
 require __DIR__ . '/../vendor/autoload.php';
 
-// Create storage directories in /tmp for Vercel Serverless environment
-$tmpDirs = [
-    '/tmp/framework/views',
-    '/tmp/framework/cache',
-    '/tmp/framework/sessions',
-    '/tmp/logs',
+// Prepare /tmp storage directories for Vercel serverless environment
+$storagePath = '/tmp/storage';
+$dirs = [
+    $storagePath . '/framework/views',
+    $storagePath . '/framework/cache',
+    $storagePath . '/framework/cache/data',
+    $storagePath . '/framework/sessions',
+    $storagePath . '/framework/testing',
+    $storagePath . '/logs',
+    $storagePath . '/app/public',
 ];
 
-foreach ($tmpDirs as $dir) {
-    if (!file_exists($dir)) {
+foreach ($dirs as $dir) {
+    if (!is_dir($dir)) {
         @mkdir($dir, 0777, true);
     }
 }
 
-// Run Laravel application
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+try {
+    // Run Laravel application
+    $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+    // Bind storage path to writable /tmp/storage
+    $app->useStoragePath($storagePath);
 
-$response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
-);
+    $kernel = $app->make(Kernel::class);
 
-$response->send();
+    $response = $kernel->handle(
+        $request = Request::capture()
+    );
 
-$kernel->terminate($request, $response);
+    $response->send();
+
+    $kernel->terminate($request, $response);
+
+} catch (\Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<h2>ReadyGrocery - Server Error</h2>';
+    echo '<p><b>Message:</b> ' . htmlspecialchars($e->getMessage()) . '</p>';
+    echo '<p><b>File:</b> ' . htmlspecialchars($e->getFile()) . ':' . $e->getLine() . '</p>';
+    echo '<pre>' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+}
