@@ -78,6 +78,11 @@ Route::get('/', function () {
     return view('app');
 })->name('home');
 
+Route::get('/seed-demo-data-now', function () {
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    return 'Database seeded with all products, categories, shops, and banners successfully!';
+});
+
 Route::get('/{any}', function () {
     return view('app');
 })->where('any', '^(?!admin|shop|install|api|storage|filemanager).*');

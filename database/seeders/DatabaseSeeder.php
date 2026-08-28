@@ -29,22 +29,20 @@ class DatabaseSeeder extends Seeder
         $this->call(HomeScreenSeeder::class);
         $this->call(UserSeeder::class);
 
-        if (app()->environment('local')) {
-            $this->call(CustomerSeeder::class);
-            $this->call(RiderSeeder::class);
-            $this->call(ShopSeeder::class);
-            $this->call(CategorySeeder::class);
-            $this->call(BrandSeeder::class);
-            $this->call(ProductSeeder::class);
-            $this->call(BannerSeeder::class);
-            $this->call(CouponSeeder::class);
-            $this->call(AddressSeeder::class);
-            $this->call(OrderSeeder::class);
-            $this->call(ReviewSeeder::class);
-            $this->call(FavoriteSeeder::class);
-            $this->call(BlogSeeder::class);
-            $this->call(RootAdminShopSeeder::class);
-        }
+        $this->call(CustomerSeeder::class);
+        $this->call(RiderSeeder::class);
+        $this->call(ShopSeeder::class);
+        $this->call(CategorySeeder::class);
+        $this->call(BrandSeeder::class);
+        $this->call(ProductSeeder::class);
+        $this->call(BannerSeeder::class);
+        $this->call(CouponSeeder::class);
+        $this->call(AddressSeeder::class);
+        $this->call(OrderSeeder::class);
+        $this->call(ReviewSeeder::class);
+        $this->call(FavoriteSeeder::class);
+        $this->call(BlogSeeder::class);
+        $this->call(RootAdminShopSeeder::class);
 
         $this->call(WalletSeeder::class);
         $this->command->info('Database seeded successfully');
