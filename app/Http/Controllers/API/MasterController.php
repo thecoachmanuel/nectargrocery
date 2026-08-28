@@ -31,48 +31,27 @@ class MasterController extends Controller
      */
     public function index()
     {
-        try {
-            $generaleSetting = generaleSetting('setting');
-        } catch (\Throwable $e) {
-            $generaleSetting = null;
-        }
+        $generaleSetting = generaleSetting('setting');
 
-        try {
-            $paymentGateways = Cache::rememberForever('payment_gateway', function () {
-                return PaymentGateway::where('is_active', true)->get();
-            });
-        } catch (\Throwable $e) {
-            $paymentGateways = collect([]);
-        }
+        $paymentGateways = Cache::rememberForever('payment_gateway', function () {
+            return PaymentGateway::where('is_active', true)->get();
+        });
 
-        try {
-            $verifyManage = Cache::rememberForever('verify_manage', function () {
-                return VerifyManage::first();
-            });
-        } catch (\Throwable $e) {
-            $verifyManage = null;
-        }
+        $verifyManage = Cache::rememberForever('verify_manage', function () {
+            return VerifyManage::first();
+        });
 
         $shopType = $generaleSetting?->shop_type ?? 'multi';
 
-        try {
-            $socialLinks = SocialLink::active()->get();
-        } catch (\Throwable $e) {
-            $socialLinks = collect([]);
-        }
+        $socialLinks = SocialLink::active()->get();
 
         $themeName = request()->cookie('theme_name');
-        try {
-            if(app()->environment('local') && $themeName){
-                $themeColor = ThemeColorRepository::query()->where('theme_name', $themeName)->first();
-                $homeTheme = HomeTheme::where('theme_name', $themeName)->first();
-            } else {
-                $themeColor = ThemeColorRepository::query()->where('is_default', true)->first();
-                $homeTheme = HomeTheme::where('is_active', true)->first();
-            }
-        } catch (\Throwable $e) {
-            $themeColor = null;
-            $homeTheme = null;
+        if(app()->environment('local') && $themeName){
+            $themeColor = ThemeColorRepository::query()->where('theme_name', $themeName)->first();
+            $homeTheme = HomeTheme::where('theme_name', $themeName)->first();
+        }else {
+            $themeColor = ThemeColorRepository::query()->where('is_default', true)->first();
+            $homeTheme = HomeTheme::where('is_active', true)->first();
         }
 
         $themeColors = (object) [
@@ -89,43 +68,31 @@ class MasterController extends Controller
             'primary900' => $themeColor ? $themeColor['variant_900'] : '#84173E',
             'primary950' => $themeColor ? $themeColor['variant_950'] : '#4A071D',
         ];
+        // home theme
 
-        try {
-            $languages = Language::all();
-        } catch (\Throwable $e) {
-            $languages = collect([]);
-        }
+        $languages = Language::all();
 
         $socialAuths = collect([]);
-        try {
-            foreach (SocialAuth::all() as $socialAuth) {
-                $socialAuths[$socialAuth->provider] = [
-                    'name' => $socialAuth->name,
-                    'client_id' => $socialAuth->client_id,
-                    'is_active' => (bool) $socialAuth->is_active,
-                    'redirect_url' => $socialAuth->redirect,
-                ];
-            }
-        } catch (\Throwable $e) {}
-
-        try {
-            $allCurrencies = Cache::rememberForever('currencies', function () {
-                return Currency::where('is_active', true)->get();
-            });
-        } catch (\Throwable $e) {
-            $allCurrencies = collect([]);
+        foreach (SocialAuth::all() as $socialAuth) {
+            $socialAuths[$socialAuth->provider] = [
+                'name' => $socialAuth->name,
+                'client_id' => $socialAuth->client_id,
+                'is_active' => (bool) $socialAuth->is_active,
+                'redirect_url' => $socialAuth->redirect,
+            ];
         }
 
-        try {
-            $defaultCurrency = generaleSetting('defaultCurrency');
-        } catch (\Throwable $e) {
-            $defaultCurrency = null;
-        }
-        $defaultRate = ($defaultCurrency && (float)$defaultCurrency->rate > 0) ? (float)$defaultCurrency->rate : 1.0;
+        $allCurrencies = Cache::rememberForever('currencies', function () {
+            return Currency::where('is_active', true)->get();
+        });
+
+        // default currency rate
+        $defaultCurrency = generaleSetting('defaultCurrency');
+        $defaultRate = 1;
 
         $currencies = $allCurrencies->map(function ($currency) use ($defaultRate) {
-            $rate = $currency->is_default ? 1.0 : (float)($currency->rate ?? 1.0);
-            $rateFromDefault = $defaultRate > 0 ? $rate / $defaultRate : 1.0;
+            $rate = $currency->is_default ? 1 : $currency->rate;
+            $rateFromDefault = $rate / $defaultRate;
 
             return [
                 'id' => $currency->id,
@@ -137,22 +104,17 @@ class MasterController extends Controller
             ];
         });
 
+        // phone min and max length
         $phoneMinLength = $verifyManage?->phone_min_length > 0 ? $verifyManage?->phone_min_length : 9;
         $phoneMaxLength = $verifyManage?->phone_max_length > 0 ? $verifyManage?->phone_max_length : 16;
 
-        try {
-            $menus = Menu::where('is_active', true)->when($shopType != 'multi', function ($query) {
-                return $query->where('url', '!=', '/shops');
-            })->orderBy('order')->get();
-        } catch (\Throwable $e) {
-            $menus = collect([]);
-        }
+        // menu
+        $menus = Menu::where('is_active', true)->when($shopType != 'multi', function ($query) {
+            return $query->where('url', '!=', '/shops');
+        })->orderBy('order')->get();
 
-        try {
-            $footers = Footer::with('items')->orderBy('order')->get();
-        } catch (\Throwable $e) {
-            $footers = collect([]);
-        }
+        // footer
+        $footers = Footer::with('items')->orderBy('order')->get();
 
         return $this->json('Master data', [
             'currency' => [
@@ -195,7 +157,7 @@ class MasterController extends Controller
             'languages' => LanguageResource::collection($languages),
             'social_auths' => $socialAuths,
             'menus' => MenuResource::collection($menus),
-            'home_themes' => $homeTheme ? HomeThemeResource::make($homeTheme) : null,
+            'home_themes' => HomeThemeResource::make($homeTheme),
             'footers' => FooterResource::collection($footers),
         ]);
     }
